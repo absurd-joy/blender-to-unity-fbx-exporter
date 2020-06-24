@@ -15,7 +15,7 @@ FBX exporter add-on for Blender 2.80+ compatible with Unity's coordinate and sca
 
 ## How to use
 
-**File > Export > Unity FBX (.fbx)**
+**Hit F9... or go to File > Export > Unity FBX (.fbx)**
 
 Exports all Empty, Mesh and Armature objects in the current scene except those in excluded collections. The full hierarchy is properly preserved and exported, including local positions and rotations.
 
@@ -23,11 +23,15 @@ Exports all Empty, Mesh and Armature objects in the current scene except those i
 <img src="/img/blender-to-unity-fbx-exporter-menu.png" alt="Blender To Unity FBX Exporter Menu">
 </p>
 
-The File Browser exposes options to export the active collection only and/or the selected objects only. If both options are checked then only the selected objects in the active collection are exported.
+## Notes
 
-<p align="center">
-<img src="/img/blender-to-unity-fbx-exporter-options.png" alt="Blender To Unity FBX Exporter Options">
-</p>
+- This is a customized version with less options and some fixes. Changes include:
+    - No save options
+    - F9 keymapping for quick exporting
+    - Fixed an undo registration issue
+    
+- Not tested with armatures nor animations. Feel free to open an issue with a simple repro scene if you encounter any problem.
+- Negative scales are imported with an unexpected but equivalent transform. Example: scale (-1, 1, 1) and no rotation is imported as scale (-1, -1, -1) and rotation (-180, 0, 0). This is equivalent, and may be changed to, the original scale (-1, 1, 1) and rotation (0, 0, 0) in Unity.
 
 ## How it works
 
@@ -40,11 +44,6 @@ When Unity imports the FBX file all objects receive a rotation of -90 degrees in
 #### Why not use the "Experimental - Apply Transform" option?
 
 This option doesn't work with object hierarchies of more than 2 levels. Objects beyond the 2nd level keep receiving unwanted rotations and scalings when imported into Unity.
-
-## Notes
-
-- Not tested with armatures nor animations. Feel free to open an issue with a simple repro scene if you encounter any problem.
-- Negative scales are imported with an unexpected but equivalent transform. Example: scale (-1, 1, 1) and no rotation is imported as scale (-1, -1, -1) and rotation (-180, 0, 0). This is equivalent, and may be changed to, the original scale (-1, 1, 1) and rotation (0, 0, 0) in Unity.
 
 #### Tested:
 
