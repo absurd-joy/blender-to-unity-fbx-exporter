@@ -1,6 +1,6 @@
 bl_info = {
 	"name": "Unity FBX format",
-	"author": "Angel ""Edy"" Garcia (@VehiclePhysics)",
+	"author": "Angel ""Edy"" Garcia (@VehiclePhysics), modifications by Alex Schwartz",
 	"version": (1, 2, 2),
 	"blender": (2, 80, 0),
 	"location": "File > Export > Unity FBX",
@@ -136,13 +136,12 @@ def export_unity_fbx(context, filepath, active_collection, selected_objects):
 	global disabled_collections
 	global disabled_objects
 
-	print("Preparing 3D model for Unity...")
-
+	print("Preparing 3D model for Unity....")
 	# Root objects: Empty, Mesh or Armature without parent
 	root_objects = [item for item in bpy.data.objects if (item.type == "EMPTY" or item.type == "MESH" or item.type == "ARMATURE") and not item.parent]
 
 	# Preserve current scene
-	bpy.ops.ed.undo_push()
+	bpy.ops.ed.undo_push(message="Saving before fbx output mods")
 	shared_data = dict()
 	hidden_collections = []
 	hidden_objects = []
@@ -205,8 +204,9 @@ def export_unity_fbx(context, filepath, active_collection, selected_objects):
 		return {'CANCELLED'}
 
 	# Restore scene and finish
+	bpy.ops.ed.undo_push(message="State saved after export finished!")
 	bpy.ops.ed.undo()
-	print("FBX file for Unity saved.")
+	print("FBX file for Unity saved....")
 	return {'FINISHED'}
 
 
@@ -237,35 +237,50 @@ class ExportUnityFbx(Operator, ExportHelper):
 	# List of operator properties, the attributes will be assigned
 	# to the class instance from the operator settings before calling.
 
-	active_collection: BoolProperty(
-		name="Active Collection Only",
-		description="Export only objects from the active collection (and its children)",
-		default=False,
-	)
+	#active_collection: BoolProperty(
+	#	name="Active Collection Only??",
+	#	description="Export only objects from the active collection (and its children)",
+	#	default=False,
+	#)
 
-	selected_objects: BoolProperty(
-		name="Selected Objects Only",
-		description="Export only selected objects. Only from current collection if the other option is also checked.",
-		default=False,
-	)
+	#selected_objects: BoolProperty(
+	#	name="Selected Objects Only",
+	#	description="Export only selected objects. Only from current collection if the other option is also checked.",
+	#	default=False,
+	#)
 
 	def execute(self, context):
-		return export_unity_fbx(context, self.filepath, self.active_collection, self.selected_objects)
+		return export_unity_fbx(context, self.filepath, False, False)
 
 
 # Only needed if you want to add into a dynamic menu
 def menu_func_export(self, context):
-	self.layout.operator(ExportUnityFbx.bl_idname, text="Unity FBX (.fbx)")
+	self.layout.operator(ExportUnityFbx.bl_idname, text="Unity FBX (.fbx) --> Hit F9")
 
+#store keymaps here to access after registration
+addon_keymaps = []
 
 def register():
 	bpy.utils.register_class(ExportUnityFbx)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
+	#keymap stuff
+	wm = bpy.context.window_manager
+	kc = wm.keyconfigs.addon
+	if kc:
+		km = wm.keyconfigs.addon.keymaps.new(name="Object Mode", space_type='EMPTY')
+		kmi = km.keymap_items.new("export_scene.unity_fbx", type='F9', value='PRESS')
+		addon_keymaps.append((km, kmi))
 
 def unregister():
+	#keymap stuff
+	for km, kmi in addon_keymaps:
+		km.keymap_items.remove(kmi)
+	addon_keymaps.clear()
+
 	bpy.utils.unregister_class(ExportUnityFbx)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
 
 
 if __name__ == "__main__":
